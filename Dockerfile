@@ -12,7 +12,7 @@ RUN pacman -Syu --noconfirm wget htop git tigervnc xfce4 xfce4-goodies glibc ado
     adobe-source-han-serif-tw-fonts adobe-source-han-serif-hk-fonts wqy-microhei wqy-zenhei wqy-bitmapfont  \
     firefox  qbittorrent-nox qbittorrent  python-pip nano rclone p7zip gawk unzip zip geckodriver\
     ttyd tmux sqlite xorg-server-xvfb x11vnc xterm xorg-server xorg-xinit python supervisor \
-    rsync erofs-utils nethogs jre-openjdk less fcitx5-im fcitx5-chinese-addons fcitx5-im fcitx5-pinyin-zhwiki \
+    rsync erofs-utils nethogs jre-openjdk inetutils less fcitx5-im fcitx5-chinese-addons fcitx5-im fcitx5-pinyin-zhwiki \
     &&pacman -Scc --noconfirm
 
 RUN useradd lsy
@@ -38,7 +38,6 @@ build_pkg bililive-recorder-bin
 build_pkg 115-browser-bin
 build_pkg videoduplicatefinder-git
 build_pkg websockify
-build_pkg inetutils
 build_pkg novnc
 EOF
 
