@@ -25,7 +25,7 @@ build_pkg() {
   cd "$pkg" || exit 1
   chmod 777 -R .
   # 使用非 root 用户构建并安装（以便后续在缓存/输出中获得包文件）
-  sudo -u lsy makepkg -sLfci --noconfirm
+  sudo -u lsy makepkg -sLfc --noconfirm
   # 收集产物（makepkg 输出目录和 pacman 缓存）
   find . -maxdepth 1 -type f -name "*.pkg.tar.*" -exec cp -f {} /pkgs/ \; || true
   cd /tmp/build
@@ -42,8 +42,6 @@ build_pkg videoduplicatefinder-git
 build_pkg websockify
 build_pkg novnc
 
-# 也收集 pacman 缓存中的包（可能包含 AUR 安装时自动拉取的依赖包）
-cp -f /var/cache/pacman/pkg/*.pkg.tar.* /pkgs/ 2>/dev/null || true
 
 EOF
 
@@ -65,7 +63,7 @@ RUN pacman -Syu --noconfirm && \
 RUN --mount=type=bind,from=builder,source=/pkgs,target=/tmp/pkgs,ro \
     set -euo pipefail; \
     if ls /tmp/pkgs/*.pkg.tar.* >/dev/null 2>&1; then \
-      pacman -U --noconfirm /tmp/pkgs/*.pkg.tar.* || true; \
+      pacman -U --noconfirm /tmp/pkgs/*.pkg.tar.zst || true; \
     fi  && \
     rm -rf /var/cache/pacman/pkg/*
 
