@@ -103,13 +103,6 @@ ENV XMODIFIERS="@im=fcitx"
 ENV SDL_IM_MODULE=fcitx
 ENV GLFW_IM_MODULE=fcitx
 
-# 运行时用户与 sudo（如果需要）
-RUN useradd -m -s /bin/bash lsy && \
-    echo "lsy ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
-
-# 进一步瘦身：删除不用的文档/locale 缓存等（按需开启/保留）
-RUN rm -rf /usr/share/man/* /usr/share/doc/* /usr/share/info/* /var/cache/pacman/pkg/* /root/.cache
-
 
 #CMD ["vncserver",":5"]
 CMD ["bash","/root/startup.sh"]
