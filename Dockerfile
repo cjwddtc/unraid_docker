@@ -19,12 +19,28 @@ RUN useradd lsy
 RUN mkdir -p /home/lsy
 RUN chown lsy -R /home/lsy
 RUN echo "lsy ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
-RUN cd /tmp
-RUN git clone --branch yay-bin --single-branch https://github.com/archlinux/aur.git yay-bin
-RUN cd yay-bin&&chmod 777 -R .&&sudo -u lsy makepkg -sLfci --noconfirm&&cd ..&&rm -rf yay-bin
-RUN sudo -u lsy yay -S --noconfirm  baidunetdisk-bin fcitx5-pinyin-moegirl tinymediamanager-bin yay-bin\
-     bililive-recorder-bin  115-browser-bin  videoduplicatefinder-git websockify inetutils novnc\
-    microsoft-edge-stable-bin&&pacman -Scc --noconfirm
+RUN <<EOF
+function build_pkg() {
+cd /tmp
+git clone --branch $1 --single-branch https://github.com/archlinux/aur.git $1
+cd $1
+chmod 777 -R .
+sudo -u lsy makepkg -sLfci --noconfirm
+cd ..
+rm -rf $1
+}
+build_pkg yay-bin
+build_pkg baidunetdisk-bin
+build_pkg fcitx5-pinyin-moegirl
+build_pkg tinymediamanager-bin
+build_pkg bililive-recorder-bin
+build_pkg 115-browser-bin
+build_pkg videoduplicatefinder-git
+build_pkg websockify
+build_pkg inetutils
+build_pkg novnc
+EOF
+
 #RUN sudo -u lsy yay -S --noconfirm websockify inetutils novnc
 #electron11-bin baidunetdisk-electron
 #tinymediamanager-bin
