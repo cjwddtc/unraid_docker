@@ -45,8 +45,6 @@ build_pkg novnc
 # 也收集 pacman 缓存中的包（可能包含 AUR 安装时自动拉取的依赖包）
 cp -f /var/cache/pacman/pkg/*.pkg.tar.* /pkgs/ 2>/dev/null || true
 
-# 最终再清理构建层缓存，减小中间层大小
-rm -rf /var/cache/pacman/pkg/* /tmp/* /root/.cache /home/lsy/.cache || true
 EOF
 
 # 运行时镜像（仅包含必要运行依赖）
@@ -64,10 +62,8 @@ RUN pacman -Syu --noconfirm && \
       python supervisor rsync erofs-utils nethogs jre-openjdk inetutils less fcitx5-im fcitx5-chinese-addons \
       fcitx5-im fcitx5-pinyin-zhwiki openssh && \
     pacman -Scc --noconfirm
-
-# 从构建阶段复制已构建的 AUR 包，并在运行时镜像中安装
-COPY --from=builder /pkgs /tmp/pkgs
-RUN set -euo pipefail; \
+RUN --mount=type=bind,from=builder,source=/pkgs,target=/tmp/pkgs,ro \
+    set -euo pipefail; \
     if ls /tmp/pkgs/*.pkg.tar.* >/dev/null 2>&1; then \
       pacman -U --noconfirm /tmp/pkgs/*.pkg.tar.* || true; \
     fi && \
