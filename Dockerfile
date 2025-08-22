@@ -21,13 +21,13 @@ build_pkg() {
   local pkg="$1"
   cd /tmp/build
   # 与原始写法保持一致（如后续你愿意，可替换为 aur.archlinux.org 的每包仓库地址）
-  git clone --branch "$pkg" --single-branch https://github.com/archlinux/aur.git "$pkg" || true
+  git clone --branch "$pkg" --single-branch https://github.com/archlinux/aur.git "$pkg"
   cd "$pkg" || exit 1
   chmod 777 -R .
   # 使用非 root 用户构建并安装（以便后续在缓存/输出中获得包文件）
   sudo -u lsy makepkg -sLfc --noconfirm
   # 收集产物（makepkg 输出目录和 pacman 缓存）
-  find . -maxdepth 1 -type f -name "*.pkg.tar.*" -exec cp -f {} /pkgs/ \; || true
+  find . -maxdepth 1 -type f -name "*.pkg.tar.*" -exec cp -f {} /pkgs/ \
   cd /tmp/build
   rm -rf "$pkg"
 }
@@ -63,7 +63,7 @@ RUN pacman -Syu --noconfirm && \
 RUN --mount=type=bind,from=builder,source=/pkgs,target=/tmp/pkgs,ro \
     set -euo pipefail; \
     if ls /tmp/pkgs/*.pkg.tar.* >/dev/null 2>&1; then \
-      pacman -U --noconfirm /tmp/pkgs/*.pkg.tar.zst || true; \
+      pacman -U --noconfirm /tmp/pkgs/*.pkg.tar.zst; \
     fi  && \
     rm -rf /var/cache/pacman/pkg/*
 
