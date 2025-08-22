@@ -20,7 +20,7 @@ RUN mkdir -p /home/lsy
 RUN chown lsy -R /home/lsy
 RUN echo "lsy ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
 RUN cd /tmp
-RUN git clone https://aur.archlinux.org/yay-bin.git
+RUN git clone --branch yay-bin --single-branch https://github.com/archlinux/aur.git
 RUN cd yay-bin&&chmod 777 -R .&&sudo -u lsy makepkg -sLfci --noconfirm&&cd ..&&rm -rf yay-bin
 RUN sudo -u lsy yay -S --noconfirm  baidunetdisk-bin fcitx5-pinyin-moegirl tinymediamanager-bin yay-bin\
      bililive-recorder-bin  115-browser-bin  videoduplicatefinder-git websockify inetutils novnc\
