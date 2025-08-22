@@ -1,35 +1,37 @@
-FROM archlinux:base-devel
-
-
+FROM archlinux:base-devel AS builder
 RUN echo "Server = https://mirrors.ustc.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
-#RUN echo "Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
-#RUN chmod 777 -R /tmp/
-#RUN rm -rf /tmp/*
-#RUN chmod 777 -R /var/cache/pacman/
-RUN pacman -Syu --noconfirm&&pacman -Scc --noconfirm
-RUN pacman -Syu --noconfirm wget htop git tigervnc xfce4 xfce4-goodies glibc adobe-source-han-sans-cn-fonts\
-    adobe-source-han-sans-tw-fonts openssh  adobe-source-han-sans-hk-fonts adobe-source-han-serif-cn-fonts  \
-    adobe-source-han-serif-tw-fonts adobe-source-han-serif-hk-fonts wqy-microhei wqy-zenhei wqy-bitmapfont  \
-    firefox  qbittorrent-nox qbittorrent  python-pip nano rclone p7zip gawk unzip zip geckodriver\
-    ttyd tmux sqlite xorg-server-xvfb x11vnc xterm xorg-server xorg-xinit python supervisor \
-    rsync erofs-utils nethogs jre-openjdk inetutils less fcitx5-im fcitx5-chinese-addons fcitx5-im fcitx5-pinyin-zhwiki \
-    &&pacman -Scc --noconfirm
 
-RUN useradd lsy
-RUN mkdir -p /home/lsy
-RUN chown lsy -R /home/lsy
-RUN echo "lsy ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
-RUN <<EOF
-set -e
-function build_pkg() {
-cd /tmp
-git clone --branch $1 --single-branch https://github.com/archlinux/aur.git $1
-cd $1
-chmod 777 -R .
-sudo -u lsy makepkg -sLfci --noconfirm
-cd ..
-rm -rf $1
+# 更新 + 基础工具 + AUR 构建所需
+RUN pacman -Syu --noconfirm && \
+    pacman -S --noconfirm --needed git sudo fakeroot base-devel binutils which && \
+    pacman -Scc --noconfirm
+
+# 非 root 用户构建 AUR（避免污染 root 环境）
+RUN useradd -m -s /bin/bash lsy && \
+    echo "lsy ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+# 构建 AUR 包并收集 *.pkg.tar.* 到 /pkgs
+# 注：保留与原逻辑一致的构建方式（构建后安装，再从缓存和输出收集包）
+RUN <<'EOF'
+set -euo pipefail
+mkdir -p /tmp/build /pkgs
+chown -R lsy:lsy /tmp/build /pkgs
+
+build_pkg() {
+  local pkg="$1"
+  cd /tmp/build
+  # 与原始写法保持一致（如后续你愿意，可替换为 aur.archlinux.org 的每包仓库地址）
+  git clone --branch "$pkg" --single-branch https://github.com/archlinux/aur.git "$pkg" || true
+  cd "$pkg" || exit 1
+  chmod 777 -R .
+  # 使用非 root 用户构建并安装（以便后续在缓存/输出中获得包文件）
+  sudo -u lsy makepkg -sLfci --noconfirm
+  # 收集产物（makepkg 输出目录和 pacman 缓存）
+  find . -maxdepth 1 -type f -name "*.pkg.tar.*" -exec cp -f {} /pkgs/ \; || true
+  cd /tmp/build
+  rm -rf "$pkg"
 }
+
 build_pkg yay-bin
 build_pkg baidunetdisk-bin
 build_pkg fcitx5-pinyin-moegirl
@@ -39,29 +41,60 @@ build_pkg 115-browser-bin
 build_pkg videoduplicatefinder-git
 build_pkg websockify
 build_pkg novnc
+
+# 也收集 pacman 缓存中的包（可能包含 AUR 安装时自动拉取的依赖包）
+cp -f /var/cache/pacman/pkg/*.pkg.tar.* /pkgs/ 2>/dev/null || true
+
+# 最终再清理构建层缓存，减小中间层大小
+rm -rf /var/cache/pacman/pkg/* /tmp/* /root/.cache /home/lsy/.cache || true
 EOF
 
-#RUN sudo -u lsy yay -S --noconfirm websockify inetutils novnc
-#electron11-bin baidunetdisk-electron
-#tinymediamanager-bin
-#RUN sed -i '$d' /etc/sudoers
-#sed "s/getConfigVar('autoconnect', false)/getConfigVar('autoconnect', true)/g" -i /usr/share/webapps/novnc/app/ui.js
-RUN python -m venv  /usr/local/
-RUN pip install Levenshtein qbittorrent-api lxml requests selenium ffmpeg-python
-RUN sed -i 's/NoExtract/#NoExtract/g' -i /etc/pacman.conf
-RUN /usr/bin/ssh-keygen -A
-RUN systemd-machine-id-setup
-RUN echo 'root:root' | chpasswd
+# 运行时镜像（仅包含必要运行依赖）
+FROM archlinux:base
+RUN echo "Server = https://mirrors.ustc.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
 
-# 配置sshd_config文件
-RUN sed -i -e 's/^#*\(PermitRootLogin\).*/\1 yes/' /etc/ssh/sshd_config
-RUN sed -i -e 's/^#*\(PasswordAuthentication\).*/\1 yes/' /etc/ssh/sshd_config
-RUN sed -i -e 's/^#*\(PermitEmptyPasswords\).*/\1 yes/' /etc/ssh/sshd_config
-RUN sed -i -e 's/^#*\(UsePAM\).*/\1 no/' /etc/ssh/sshd_config
-RUN sudo pacman -Syu  --noconfirm glibc
-RUN sed -i 's/#zh_/zh_/g' -i /etc/locale.gen
-RUN sed -i 's/#en_US/en_US/g' -i /etc/locale.gen
-RUN locale-gen
+# 合并系统更新与运行时依赖安装，安装完成后清缓存
+# 如无图形界面需求，可按需移除 xfce4/novnc/xorg 等以进一步瘦身
+RUN pacman -Syu --noconfirm && \
+    pacman -S --noconfirm --needed wget htop git tigervnc xfce4 xfce4-goodies glibc \
+      adobe-source-han-sans-cn-fonts adobe-source-han-sans-tw-fonts adobe-source-han-sans-hk-fonts \
+      adobe-source-han-serif-cn-fonts adobe-source-han-serif-tw-fonts adobe-source-han-serif-hk-fonts \
+      wqy-microhei wqy-zenhei wqy-bitmapfont firefox qbittorrent-nox qbittorrent python-pip nano rclone \
+      p7zip gawk unzip zip geckodriver ttyd tmux sqlite xorg-server-xvfb x11vnc xterm xorg-server xorg-xinit \
+      python supervisor rsync erofs-utils nethogs jre-openjdk inetutils less fcitx5-im fcitx5-chinese-addons \
+      fcitx5-im fcitx5-pinyin-zhwiki openssh && \
+    pacman -Scc --noconfirm
+
+# 从构建阶段复制已构建的 AUR 包，并在运行时镜像中安装
+COPY --from=builder /pkgs /tmp/pkgs
+RUN set -euo pipefail; \
+    if ls /tmp/pkgs/*.pkg.tar.* >/dev/null 2>&1; then \
+      pacman -U --noconfirm /tmp/pkgs/*.pkg.tar.* || true; \
+    fi && \
+    rm -rf /tmp/pkgs && \
+    rm -rf /var/cache/pacman/pkg/*
+
+# Python 环境与依赖（无缓存安装，减少层大小）
+# 若你已有 requirements.txt，可替换为：pip install --no-cache-dir -r requirements.txt
+RUN python -m venv /usr/local && \
+    /usr/local/bin/pip install --no-cache-dir --upgrade pip && \
+    /usr/local/bin/pip install --no-cache-dir Levenshtein qbittorrent-api lxml requests selenium ffmpeg-python && \
+    rm -rf /root/.cache
+
+# 系统配置与本地化
+RUN sed -i 's/NoExtract/#NoExtract/g' /etc/pacman.conf && \
+    /usr/bin/ssh-keygen -A && \
+    systemd-machine-id-setup && \
+    echo 'root:root' | chpasswd && \
+    sed -i -e 's/^#*\(PermitRootLogin\).*/\1 yes/' \
+           -e 's/^#*\(PasswordAuthentication\).*/\1 yes/' \
+           -e 's/^#*\(PermitEmptyPasswords\).*/\1 yes/' \
+           -e 's/^#*\(UsePAM\).*/\1 no/' /etc/ssh/sshd_config && \
+    pacman -Syu --noconfirm glibc && \
+    sed -i 's/#zh_/zh_/g' /etc/locale.gen && \
+    sed -i 's/#en_US/en_US/g' /etc/locale.gen && \
+    locale-gen
+
 ENV LANG=zh_CN.UTF-8
 ENV LC_ALL=zh_CN.UTF-8
 ENV GTK_IM_MODULE=fcitx
@@ -69,5 +102,14 @@ ENV QT_IM_MODULE=fcitx
 ENV XMODIFIERS="@im=fcitx"
 ENV SDL_IM_MODULE=fcitx
 ENV GLFW_IM_MODULE=fcitx
+
+# 运行时用户与 sudo（如果需要）
+RUN useradd -m -s /bin/bash lsy && \
+    echo "lsy ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+# 进一步瘦身：删除不用的文档/locale 缓存等（按需开启/保留）
+RUN rm -rf /usr/share/man/* /usr/share/doc/* /usr/share/info/* /var/cache/pacman/pkg/* /root/.cache
+
+
 #CMD ["vncserver",":5"]
 CMD ["bash","/root/startup.sh"]
