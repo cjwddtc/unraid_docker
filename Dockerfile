@@ -1,6 +1,6 @@
 FROM archlinux:base-devel
 
-#set -e
+
 RUN echo "Server = https://mirrors.ustc.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
 #RUN echo "Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
 #RUN chmod 777 -R /tmp/
@@ -20,6 +20,7 @@ RUN mkdir -p /home/lsy
 RUN chown lsy -R /home/lsy
 RUN echo "lsy ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
 RUN <<EOF
+set -e
 function build_pkg() {
 cd /tmp
 git clone --branch $1 --single-branch https://github.com/archlinux/aur.git $1
