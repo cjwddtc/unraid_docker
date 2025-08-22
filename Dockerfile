@@ -27,7 +27,7 @@ build_pkg() {
   # 使用非 root 用户构建并安装（以便后续在缓存/输出中获得包文件）
   sudo -u lsy makepkg -sLfc --noconfirm
   # 收集产物（makepkg 输出目录和 pacman 缓存）
-  find . -maxdepth 1 -type f -name "*.pkg.tar.*" -exec cp -f {} /pkgs/ \
+  find . -maxdepth 1 -type f -name "*.pkg.tar.*" -exec cp -f {} /pkgs/ \; || true
   cd /tmp/build
   rm -rf "$pkg"
 }
