@@ -66,8 +66,7 @@ RUN --mount=type=bind,from=builder,source=/pkgs,target=/tmp/pkgs,ro \
     set -euo pipefail; \
     if ls /tmp/pkgs/*.pkg.tar.* >/dev/null 2>&1; then \
       pacman -U --noconfirm /tmp/pkgs/*.pkg.tar.* || true; \
-    fi && \
-    rm -rf /tmp/pkgs && \
+    fi  && \
     rm -rf /var/cache/pacman/pkg/*
 
 # Python 环境与依赖（无缓存安装，减少层大小）
