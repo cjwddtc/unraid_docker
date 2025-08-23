@@ -52,12 +52,12 @@ RUN echo "Server = https://mirrors.ustc.edu.cn/archlinux/\$repo/os/\$arch" > /et
 # 合并系统更新与运行时依赖安装，安装完成后清缓存
 # 如无图形界面需求，可按需移除 xfce4/novnc/xorg 等以进一步瘦身
 RUN pacman -Syu --noconfirm && \
-    pacman -S --noconfirm --needed wget htop git tigervnc xfce4 xfce4-goodies glibc \
+    pacman -S --noconfirm --needed wget htop git tigervnc xfce4 xfce4-goodies glibc ffmpeg\
       adobe-source-han-sans-cn-fonts adobe-source-han-sans-tw-fonts adobe-source-han-sans-hk-fonts \
       adobe-source-han-serif-cn-fonts adobe-source-han-serif-tw-fonts adobe-source-han-serif-hk-fonts \
       wqy-microhei wqy-zenhei wqy-bitmapfont firefox qbittorrent-nox qbittorrent python-pip nano rclone \
       p7zip gawk unzip zip geckodriver ttyd tmux sqlite xorg-server-xvfb x11vnc xterm xorg-server xorg-xinit \
-      python supervisor rsync erofs-utils nethogs jre-openjdk inetutils less fcitx5-im fcitx5-chinese-addons \
+      python supervisor rsync erofs-utils nethogs inetutils less fcitx5-im fcitx5-chinese-addons \
       fcitx5-im fcitx5-pinyin-zhwiki openssh && \
     pacman -Scc --noconfirm
 RUN --mount=type=bind,from=builder,source=/pkgs,target=/tmp/pkgs,ro \
