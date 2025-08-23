@@ -35,7 +35,7 @@ build_pkg() {
 build_pkg yay-bin
 build_pkg baidunetdisk-bin
 build_pkg fcitx5-pinyin-moegirl
-build_pkg tinymediamanager-bin
+build_pkg tiny-media-manager
 build_pkg bililive-recorder-bin
 build_pkg 115-browser-bin
 build_pkg videoduplicatefinder-git
