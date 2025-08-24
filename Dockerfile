@@ -90,11 +90,11 @@ RUN sed -i 's/NoExtract/#NoExtract/g' /etc/pacman.conf && \
 
 ENV LANG=zh_CN.UTF-8
 ENV LC_ALL=zh_CN.UTF-8
-ENV GTK_IM_MODULE=fcitx
-ENV QT_IM_MODULE=fcitx
-ENV XMODIFIERS="@im=fcitx"
-ENV SDL_IM_MODULE=fcitx
-ENV GLFW_IM_MODULE=fcitx
+ENV GTK_IM_MODULE=fcitx5
+ENV QT_IM_MODULE=fcitx5
+ENV XMODIFIERS="@im=fcitx5"
+ENV SDL_IM_MODULE=fcitx5
+ENV GLFW_IM_MODULE=fcitx5
 
 
 #CMD ["vncserver",":5"]
