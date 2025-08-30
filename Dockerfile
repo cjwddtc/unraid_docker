@@ -58,7 +58,7 @@ RUN pacman -Syu --noconfirm && \
       wqy-microhei wqy-zenhei wqy-bitmapfont firefox qbittorrent-nox qbittorrent python-pip nano rclone \
       p7zip gawk unzip zip geckodriver ttyd tmux sqlite xorg-server-xvfb x11vnc xterm xorg-server xorg-xinit \
       python supervisor rsync erofs-utils nethogs inetutils less fcitx5-im fcitx5-chinese-addons \
-      fcitx5-im fcitx5-pinyin-zhwiki openssh && \
+      fcitx5-pinyin-zhwiki openssh noto-fonts-emoji ttf-dejavu&& \
     pacman -Scc --noconfirm
 RUN --mount=type=bind,from=builder,source=/pkgs,target=/tmp/pkgs,ro \
     set -euo pipefail; \
@@ -89,7 +89,6 @@ RUN sed -i 's/NoExtract/#NoExtract/g' /etc/pacman.conf && \
     locale-gen
 
 ENV LANG=zh_CN.UTF-8
-ENV LC_ALL=zh_CN.UTF-8
 ENV GTK_IM_MODULE=fcitx
 ENV QT_IM_MODULE=fcitx
 ENV XMODIFIERS="@im=fcitx"
