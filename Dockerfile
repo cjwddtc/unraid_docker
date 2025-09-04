@@ -41,7 +41,6 @@ build_pkg 115-browser-bin
 build_pkg videoduplicatefinder-git
 build_pkg websockify
 build_pkg novnc
-build_pkg tightvnc
 
 
 EOF
@@ -53,7 +52,7 @@ RUN echo "Server = https://mirrors.ustc.edu.cn/archlinux/\$repo/os/\$arch" > /et
 # 合并系统更新与运行时依赖安装，安装完成后清缓存
 # 如无图形界面需求，可按需移除 xfce4/novnc/xorg 等以进一步瘦身
 RUN pacman -Syu --noconfirm && \
-    pacman -S --noconfirm --needed wget htop git xfce4 xfce4-goodies glibc ffmpeg\
+    pacman -S --noconfirm --needed wget htop git tigervnc xfce4 xfce4-goodies glibc ffmpeg\
       adobe-source-han-sans-cn-fonts adobe-source-han-sans-tw-fonts adobe-source-han-sans-hk-fonts \
       adobe-source-han-serif-cn-fonts adobe-source-han-serif-tw-fonts adobe-source-han-serif-hk-fonts \
       wqy-microhei wqy-zenhei wqy-bitmapfont firefox qbittorrent-nox qbittorrent python-pip nano rclone \
