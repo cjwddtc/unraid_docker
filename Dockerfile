@@ -41,7 +41,7 @@ build_pkg 115-browser-bin
 build_pkg videoduplicatefinder-git
 build_pkg websockify
 build_pkg novnc
-build_pkg realvnc-vnc-server
+build_pkg tightvnc
 
 
 EOF
