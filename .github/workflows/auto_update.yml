@@ -28,8 +28,11 @@ jobs:
         else
           echo "should_build=false" >> $GITHUB_OUTPUT
         fi
-    - name: build docker image
-      if: steps.check.outputs.should_trigger != 'false'
-      uses: ./.github/workflows/docker-image.yml@main
-      with:
-        image-name: debian_vnc
+  
+  call-docker-build:
+    needs: build
+    if: needs.build.outputs.should_build == 'true'
+    uses: ./.github/workflows/docker-image.yml
+    with:
+      image-name: debian_vnc
+    secrets: inherit
