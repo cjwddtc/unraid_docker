@@ -45,8 +45,8 @@ cat <<EOM >/usr/share/applications/tinyMediaManager.desktop
 Type=Application
 Terminal=false
 Name=tinyMediaManager
-Icon=$PWD/tmm.png
-Exec=$PWD/tinyMediaManager
+Icon=/opt/tinyMediaManager/tmm.png
+Exec=/opt/tinyMediaManager/tinyMediaManager
 EOM
 wget  https://down.115.com/client/115pc/lin/115br_v36.0.0.deb -O /tmp/115.deb
 apt install -y /tmp/115.deb
