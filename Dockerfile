@@ -35,6 +35,19 @@ echo "root:1234" | chpasswd
 mkdir -p /usr/share/fcitx5/pinyin/dictionaries/
 wget https://github.com/outloudvi/mw2fcitx/releases/download/20250909/moegirl.dict -o /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
 wget https://github.com/felixonmars/fcitx5-pinyin-zhwiki/releases/download/0.2.5/zhwiki-20250823.dict -o /usr/share/fcitx5/pinyin/dictionaries/zhwiki.dict
+wget https://release.tinymediamanager.org/v5/dist/tinyMediaManager-5.2.2-linux-amd64.tar.xz -O /tmp/tmm.tar.xz
+mkdir -p /opt
+cd /opt
+tar xf /tmp/tmm.tar.xz
+cd tinyMediaManager
+cat <<EOM >/usr/share/applications/tinyMediaManager.desktop
+[Desktop Entry]
+Type=Application
+Terminal=false
+Name=tinyMediaManager
+Icon=$PWD/tmm.png
+Exec=$PWD/tinyMediaManager
+EOM
 wget  https://down.115.com/client/115pc/lin/115br_v36.0.0.deb -O /tmp/115.deb
 apt install -y /tmp/115.deb
 rm /tmp/115.deb
