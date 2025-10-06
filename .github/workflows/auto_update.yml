@@ -28,6 +28,6 @@ jobs:
           echo "should_build=false" >> $GITHUB_OUTPUT
         fi
     - name: build docker image
-      if: steps.check.outputs.should_trigger == 'true'
+      if: steps.check.outputs.should_trigger != 'false'
       uses: ./.github/workflows/docker-image.yml
     
