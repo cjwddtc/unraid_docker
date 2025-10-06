@@ -36,7 +36,7 @@ apt-get install -y --no-install-recommends \
     build-essential ffmpeg  firefox-esr nano libmediainfo0v5 fcitx5-chinese-addons \
     fcitx5-module-cloudpinyin fcitx5-config-qt tmux curl unzip p7zip-full file
 
-echo "root:1234" | chpasswd
+echo "root:root" | chpasswd
 mkdir -p /usr/share/fcitx5/pinyin/dictionaries/
 wget $MEO_DICT_URL -O /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
 wget $WIKI_DICT_URL -O /usr/share/fcitx5/pinyin/dictionaries/zhwiki.dict
