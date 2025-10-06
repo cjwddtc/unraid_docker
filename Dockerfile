@@ -1,101 +1,65 @@
-FROM archlinux:base-devel AS builder
-RUN echo "Server = https://mirrors.ustc.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
+# 基础镜像
+FROM debian:13
+# 环境变量
+ENV LANG=zh_CN.UTF-8
+ENV LANGUAGE=zh_CN:zh
+ENV LC_ALL=zh_CN.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
 
-# 更新 + 基础工具 + AUR 构建所需
-RUN pacman -Syu --noconfirm && \
-    pacman -S --noconfirm --needed git sudo fakeroot base-devel binutils which && \
-    pacman -Scc --noconfirm
+# 工作目录
+WORKDIR /root
 
-# 非 root 用户构建 AUR（避免污染 root 环境）
-RUN useradd -m -s /bin/bash lsy && \
-    echo "lsy ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
-
-# 构建 AUR 包并收集 *.pkg.tar.* 到 /pkgs
-# 注：保留与原逻辑一致的构建方式（构建后安装，再从缓存和输出收集包）
-RUN <<'EOF'
-set -euo pipefail
-mkdir -p /tmp/build /pkgs
-chown -R lsy:lsy /tmp/build /pkgs
-
-build_pkg() {
-  local pkg="$1"
-  cd /tmp/build
-  # 与原始写法保持一致（如后续你愿意，可替换为 aur.archlinux.org 的每包仓库地址）
-  git clone --branch "$pkg" --single-branch https://github.com/archlinux/aur.git "$pkg"
-  cd "$pkg" || exit 1
-  chmod 777 -R .
-  # 使用非 root 用户构建并安装（以便后续在缓存/输出中获得包文件）
-  sudo -u lsy makepkg -sLfci --noconfirm
-  # 收集产物（makepkg 输出目录和 pacman 缓存）
-  find . -maxdepth 1 -type f -name "*.pkg.tar.*" -exec cp -f {} /pkgs/ \; || true
-  cd /tmp/build
-  rm -rf "$pkg"
-}
-
-build_pkg yay-bin
-build_pkg baidunetdisk-bin
-build_pkg fcitx5-pinyin-moegirl
-build_pkg tiny-media-manager
-build_pkg bililive-recorder-bin
-build_pkg 115-browser-bin
-build_pkg videoduplicatefinder-git
-build_pkg websockify
-build_pkg novnc
-
-
+# 替换为中科大源
+RUN <<EOF
+sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources
 EOF
 
-# 运行时镜像（仅包含必要运行依赖）
-FROM archlinux:base
-RUN echo "Server = https://mirrors.ustc.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
+# 设置时区和安装所需软件
+RUN <<EOF bash
+set -e
+apt-get update
+apt-get install -y --no-install-recommends \
+    locales \
+    tzdata \
+    xfce4 xfce4-goodies \
+    python3 python3-pip python3-venv \
+    fontconfig 7zip\
+    fonts-wqy-microhei fonts-wqy-zenhei \
+    x11vnc tigervnc-standalone-server tigervnc-tools\
+    dbus-x11 xfonts-base xfonts-75dpi fcitx5 fonts-noto fuse novnc websockify\
+    wget ca-certificates openssh-server cmake git rsync sudo \
+    build-essential ffmpeg  firefox-esr nano libmediainfo0v5 fcitx5-chinese-addons \
+    fcitx5-module-cloudpinyin fcitx5-config-qt tmux curl unzip p7zip-full file
 
-# 合并系统更新与运行时依赖安装，安装完成后清缓存
-# 如无图形界面需求，可按需移除 xfce4/novnc/xorg 等以进一步瘦身
-RUN pacman -Syu --noconfirm && \
-    pacman -S --noconfirm --needed wget htop git tigervnc xfce4 xfce4-goodies glibc ffmpeg\
-      adobe-source-han-sans-cn-fonts adobe-source-han-sans-tw-fonts adobe-source-han-sans-hk-fonts \
-      adobe-source-han-serif-cn-fonts adobe-source-han-serif-tw-fonts adobe-source-han-serif-hk-fonts \
-      wqy-microhei wqy-zenhei wqy-bitmapfont firefox qbittorrent-nox qbittorrent python-pip nano rclone \
-      p7zip gawk unzip zip geckodriver ttyd tmux sqlite xorg-server-xvfb x11vnc xterm xorg-server xorg-xinit \
-      python supervisor rsync erofs-utils nethogs inetutils less fcitx5-im fcitx5-chinese-addons \
-      fcitx5-pinyin-zhwiki openssh noto-fonts-emoji ttf-dejavu&& \
-    pacman -Scc --noconfirm
-RUN --mount=type=bind,from=builder,source=/pkgs,target=/tmp/pkgs,ro \
-    set -euo pipefail; \
-    if ls /tmp/pkgs/*.pkg.tar.* >/dev/null 2>&1; then \
-      pacman -U --noconfirm /tmp/pkgs/*.pkg.tar.zst; \
-    fi  && \
-    rm -rf /var/cache/pacman/pkg/*
-
-# Python 环境与依赖（无缓存安装，减少层大小）
-# 若你已有 requirements.txt，可替换为：pip install --no-cache-dir -r requirements.txt
-RUN python -m venv /usr/local && \
-    /usr/local/bin/pip install --no-cache-dir --upgrade pip && \
-    /usr/local/bin/pip install --no-cache-dir Levenshtein qbittorrent-api lxml requests selenium ffmpeg-python && \
-    rm -rf /root/.cache
-
-# 系统配置与本地化
-RUN sed -i 's/NoExtract/#NoExtract/g' /etc/pacman.conf && \
-    /usr/bin/ssh-keygen -A && \
-    systemd-machine-id-setup && \
-    echo 'root:root' | chpasswd && \
-    sed -i -e 's/^#*\(PermitRootLogin\).*/\1 yes/' \
-           -e 's/^#*\(PasswordAuthentication\).*/\1 yes/' \
-           -e 's/^#*\(PermitEmptyPasswords\).*/\1 yes/' \
-           -e 's/^#*\(UsePAM\).*/\1 no/' /etc/ssh/sshd_config && \
-    pacman -Syu --noconfirm glibc && \
-    sed -i 's/#zh_/zh_/g' /etc/locale.gen && \
-    sed -i 's/#en_US/en_US/g' /etc/locale.gen && \
-    locale-gen
-
-ENV LANG=zh_CN.UTF-8
+echo "root:1234" | chpasswd
+mkdir -p /usr/share/fcitx5/pinyin/dictionaries/
+wget https://github.com/outloudvi/mw2fcitx/releases/download/20250909/moegirl.dict -o /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
+wget https://github.com/felixonmars/fcitx5-pinyin-zhwiki/releases/download/0.2.5/zhwiki-20250823.dict -o /usr/share/fcitx5/pinyin/dictionaries/zhwiki.dict
+wget  https://down.115.com/client/115pc/lin/115br_v36.0.0.deb -O /tmp/115.deb
+apt install -y /tmp/115.deb
+rm /tmp/115.deb
+wget  http://wppkg.baidupcs.com/issue/netdisk/Linuxguanjia/4.17.7/baidunetdisk_4.17.7_amd64.deb -O /tmp/baidunetdisk.deb
+apt install -y /tmp/baidunetdisk.deb
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen
+locale-gen
+curl https://rclone.org/install.sh |  bash
+update-locale LANG=zh_CN.UTF-8
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+echo "Asia/Shanghai" > /etc/timezone
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+EOF
+RUN <<EOF bash
+set -e
+python3 -m venv /usr/local
+pip3 install requests  Levenshtein ffmpeg-python  qbittorrent-api lxml selenium
+EOF
 ENV GTK_IM_MODULE=fcitx
 ENV QT_IM_MODULE=fcitx
 ENV XMODIFIERS="@im=fcitx"
 ENV SDL_IM_MODULE=fcitx
 ENV GLFW_IM_MODULE=fcitx
-ENV XDG_SESSION_TYPE=x11
 
 
-#CMD ["vncserver",":5"]
 CMD ["bash","/root/startup.sh"]
