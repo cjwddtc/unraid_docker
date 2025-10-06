@@ -30,6 +30,6 @@ jobs:
         fi
     - name: build docker image
       if: steps.check.outputs.should_trigger != 'false'
-      uses: ./.github/workflows/docker-image.yml
+      uses: ./.github/workflows/docker-image.yml@main
       with:
         image-name: debian_vnc
