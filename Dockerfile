@@ -33,8 +33,8 @@ apt-get install -y --no-install-recommends \
 
 echo "root:1234" | chpasswd
 mkdir -p /usr/share/fcitx5/pinyin/dictionaries/
-#wget https://github.com/outloudvi/mw2fcitx/releases/download/20250909/moegirl.dict -o /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
-#wget https://github.com/felixonmars/fcitx5-pinyin-zhwiki/releases/download/0.2.5/zhwiki-20250823.dict -o /usr/share/fcitx5/pinyin/dictionaries/zhwiki.dict
+wget https://github.com/outloudvi/mw2fcitx/releases/download/20250909/moegirl.dict -O /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
+wget https://github.com/felixonmars/fcitx5-pinyin-zhwiki/releases/download/0.2.5/zhwiki-20250823.dict -O /usr/share/fcitx5/pinyin/dictionaries/zhwiki.dict
 wget https://release.tinymediamanager.org/v5/dist/tinyMediaManager-5.2.2-linux-amd64.tar.xz -O /tmp/tmm.tar.xz
 mkdir -p /opt
 cd /opt
