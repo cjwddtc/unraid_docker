@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: pull latest
+    - name: Checkout code
+      uses: actions/checkout@v4
     - name: Load environment variables from docker.env
       run: |
         cat docker.env >> $GITHUB_ENV
