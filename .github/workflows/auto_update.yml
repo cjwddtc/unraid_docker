@@ -10,6 +10,8 @@ jobs:
     permissions:
       contents: write
       actions: write
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -31,7 +33,7 @@ jobs:
   
   call-docker-build:
     needs: build
-    if: needs.build.outputs.should_build == 'false'
+    if: needs.build.outputs.should_build == 'true'
     uses: ./.github/workflows/docker-image.yml
     with:
       image-name: debian_vnc
