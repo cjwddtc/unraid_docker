@@ -31,4 +31,5 @@ jobs:
     - name: build docker image
       if: steps.check.outputs.should_trigger != 'false'
       uses: ./.github/workflows/docker-image.yml
-
+      with:
+        image-name: debian_vnc
