@@ -14,6 +14,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     - name: Update
+      id: check
       run: |
         pip install BeautifulSoup4
         python update_version.py
@@ -30,4 +31,4 @@ jobs:
     - name: build docker image
       if: steps.check.outputs.should_trigger != 'false'
       uses: ./.github/workflows/docker-image.yml
-    
+
