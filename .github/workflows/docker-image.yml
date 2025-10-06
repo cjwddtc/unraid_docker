@@ -18,12 +18,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag arch_vnc:latest
+      run: docker build . --file Dockerfile --env-file docker.env --tag debian_vnc:latest
     - name: Extract Docker metadata
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ secrets.DOCKERHUB_USERNAME }}/arch_vnc
+        images: ${{ secrets.DOCKERHUB_USERNAME }}/debian_vnc
         tags: |
           type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
           type=sha,prefix=,suffix=,format=short

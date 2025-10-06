@@ -1,5 +1,10 @@
 # 基础镜像
 FROM debian:13
+ARG TMM_URL
+ARG MEO_DICT_URL
+ARG WIKI_DICT_URL
+ARG PAN_115_URL
+ARG PAN_BAIDU_URL
 # 环境变量
 ENV LANG=zh_CN.UTF-8
 ENV LANGUAGE=zh_CN:zh
@@ -33,9 +38,9 @@ apt-get install -y --no-install-recommends \
 
 echo "root:1234" | chpasswd
 mkdir -p /usr/share/fcitx5/pinyin/dictionaries/
-wget https://github.com/outloudvi/mw2fcitx/releases/download/20250909/moegirl.dict -O /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
-wget https://github.com/felixonmars/fcitx5-pinyin-zhwiki/releases/download/0.2.5/zhwiki-20250823.dict -O /usr/share/fcitx5/pinyin/dictionaries/zhwiki.dict
-wget https://release.tinymediamanager.org/v5/dist/tinyMediaManager-5.2.2-linux-amd64.tar.xz -O /tmp/tmm.tar.xz
+wget $MEO_DICT_URL -O /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
+wget $WIKI_DICT_URL -O /usr/share/fcitx5/pinyin/dictionaries/zhwiki.dict
+wget $TMM_URL -O /tmp/tmm.tar.xz
 mkdir -p /opt
 cd /opt
 tar xf /tmp/tmm.tar.xz
@@ -48,10 +53,10 @@ Name=tinyMediaManager
 Icon=/opt/tinyMediaManager/tmm.png
 Exec=/opt/tinyMediaManager/tinyMediaManager
 EOM
-wget  https://down.115.com/client/115pc/lin/115br_v36.0.0.deb -O /tmp/115.deb
+wget $PAN_115_URL -O /tmp/115.deb
 apt install -y /tmp/115.deb
 rm /tmp/115.deb
-wget  http://wppkg.baidupcs.com/issue/netdisk/Linuxguanjia/4.17.7/baidunetdisk_4.17.7_amd64.deb -O /tmp/baidunetdisk.deb
+wget $PAN_BAIDU_URL -O /tmp/baidunetdisk.deb
 apt install -y /tmp/baidunetdisk.deb
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen
