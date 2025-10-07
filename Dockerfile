@@ -5,6 +5,7 @@ ARG MEO_DICT_URL
 ARG WIKI_DICT_URL
 ARG PAN_115_URL
 ARG PAN_BAIDU_URL
+ARG ROOT_PASSWORD
 # 环境变量
 ENV LANG=zh_CN.UTF-8
 ENV LANGUAGE=zh_CN:zh
@@ -38,7 +39,7 @@ apt-get install -y --no-install-recommends \
 apt-get install -y --no-install-recommends -t trixie-backports qbittorrent
 EOF
 RUN <<EOF bash
-echo "root:root" | chpasswd
+echo "root:$ROOT_PASSWORD" | chpasswd
 mkdir -p /usr/share/fcitx5/pinyin/dictionaries/
 wget $MEO_DICT_URL -O /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
 wget $WIKI_DICT_URL -O /usr/share/fcitx5/pinyin/dictionaries/zhwiki.dict

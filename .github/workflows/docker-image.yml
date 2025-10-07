@@ -51,3 +51,4 @@ jobs:
           WIKI_DICT_URL=${{ env.WIKI_DICT_URL }}
           PAN_115_URL=${{ env.PAN_115_URL }}
           PAN_BAIDU_URL=${{ env.PAN_BAIDU_URL }}
+          ROOT_PASSWORD=${{ secrets.ROOT_PASSWORD }}
