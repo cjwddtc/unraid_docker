@@ -1,30 +1,10 @@
 # coding=utf-8
 import requests
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 import re
 from urllib.parse import urljoin
+import subprocess
 
-def get_linux_x86_64_tmm_link():
-    # 目标下载页URL
-    target_url = "https://release.tinymediamanager.org/download_v5.html"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    }
-
-    # 1. 请求页面并解析文本
-    resp = requests.get(target_url, headers=headers, timeout=15)
-    resp.raise_for_status()
-    soup = BeautifulSoup(resp.text, "html.parser")
-    base_domain = "https://release.tinymediamanager.org/"
-    for a in soup.find_all('a'):
-        try:
-            href=a.get('href')
-            if 'amd64' in href and 'linux'in href and href.endswith('.xz'):
-                return urljoin(base_domain, href)
-        except:
-            pass
-    return ''
-import requests
 
 def get_latest_release(repo_url):
     """
@@ -46,9 +26,9 @@ def get_latest_release(repo_url):
         assets = release_data.get("assets", [])
 
         # 获取第一个资源的下载链接
-        download_url = assets[0]['browser_download_url'] if assets else "No assets available"
+        download_urls = [asset['browser_download_url']  for asset in assets]
 
-        return tag_name, download_url
+        return tag_name, download_urls
     except requests.RequestException as e:
         print(f"Error fetching release data: {e}")
         return None, None
@@ -66,12 +46,29 @@ def update_docker_env(key,new_url):
             else:
                 file.write(line)
 
-
+def get_latest_url(pkg_name):
+    ret=requests.get(f'https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h={pkg_name}')
+    if ret.status_code != 200:
+        return None
+    bash_script = ret.text+'echo $source_x86_64\n'
+    result=subprocess.run(['bash'],text=True,input=bash_script,check=True,capture_output=True)
+    url=result.stdout.split('::')[1]
+    return url.strip()
 if __name__ == "__main__":
-    repo_url = "https://github.com/outloudvi/mw2fcitx"
-    tag_name, _ = get_latest_release(repo_url)
-    if tag_name:
-        download_url = f"https://github.com/outloudvi/mw2fcitx/releases/download/{tag_name}/moegirl.dict"
-        update_docker_env('MEO_DICT_URL',download_url)
+    tag_name, urls = get_latest_release("https://github.com/outloudvi/mw2fcitx")
+    for url in urls:
+        if url.endswith('.dict'):
+            download_url = url
+            update_docker_env('MEO_DICT_URL',download_url)
+            break
+    tag_name, urls = get_latest_release("https://github.com/felixonmars/fcitx5-pinyin-zhwiki")
 
-    update_docker_env('TMM_URL',get_linux_x86_64_tmm_link())
+    for url in reversed(urls):
+        if url.endswith('.dict'):
+            download_url = url
+            update_docker_env('WIKI_DICT_URL',download_url)
+            break
+
+    update_docker_env('TMM_URL',get_latest_url('tinymediamanager-bin'))
+    update_docker_env('PAN_115_URL',get_latest_url('115-browser-bin'))
+    update_docker_env('PAN_BAIDU_URL',get_latest_url('baidunetdisk-bin'))
