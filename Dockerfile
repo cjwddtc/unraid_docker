@@ -1,5 +1,5 @@
 # 基础镜像
-FROM debian:13
+FROM debian:trixie-backports
 ARG TMM_URL
 ARG MEO_DICT_URL
 ARG WIKI_DICT_URL
@@ -24,7 +24,7 @@ RUN <<EOF bash
 set -e
 apt-get update
 apt-get install -y --no-install-recommends \
-    locales qbittorrent\
+    locales\
     tzdata \
     xfce4 xfce4-goodies \
     python3 python3-pip python3-venv \
@@ -35,6 +35,7 @@ apt-get install -y --no-install-recommends \
     wget ca-certificates openssh-server cmake git rsync sudo \
     build-essential ffmpeg  firefox-esr nano libmediainfo0v5 fcitx5-chinese-addons \
     fcitx5-module-cloudpinyin fcitx5-config-qt tmux curl unzip p7zip-full file
+apt-get install -t trixie-backports qbittorrent
 EOF
 RUN <<EOF bash
 echo "root:root" | chpasswd
