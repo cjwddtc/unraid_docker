@@ -35,7 +35,8 @@ apt-get install -y --no-install-recommends \
     wget ca-certificates openssh-server cmake git rsync sudo \
     build-essential ffmpeg  firefox-esr nano libmediainfo0v5 fcitx5-chinese-addons \
     fcitx5-module-cloudpinyin fcitx5-config-qt tmux curl unzip p7zip-full file
-
+EOF
+RUN <<EOF bash
 echo "root:root" | chpasswd
 mkdir -p /usr/share/fcitx5/pinyin/dictionaries/
 wget $MEO_DICT_URL -O /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
