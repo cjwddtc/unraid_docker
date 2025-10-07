@@ -20,6 +20,7 @@ jobs:
       uses: actions/checkout@v4
     - name: Load environment variables from docker.env
       run: |
+        git pull
         cat docker.env >> $GITHUB_ENV
     - name: Extract Docker metadata
       id: meta
