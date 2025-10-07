@@ -41,9 +41,9 @@ EOF
 RUN <<EOF bash
 echo "root:$ROOT_PASSWORD" | chpasswd
 mkdir -p /usr/share/fcitx5/pinyin/dictionaries/
-wget $MEO_DICT_URL -O /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
-wget $WIKI_DICT_URL -O /usr/share/fcitx5/pinyin/dictionaries/zhwiki.dict
-wget $TMM_URL -O /tmp/tmm.tar.xz
+wget $MEO_DICT_URL -qO /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
+wget $WIKI_DICT_URL -qO /usr/share/fcitx5/pinyin/dictionaries/zhwiki.dict
+wget $TMM_URL -qO /tmp/tmm.tar.xz
 mkdir -p /opt
 cd /opt
 tar xf /tmp/tmm.tar.xz
@@ -56,10 +56,10 @@ Name=tinyMediaManager
 Icon=/opt/tinyMediaManager/tmm.png
 Exec=/opt/tinyMediaManager/tinyMediaManager
 EOM
-wget $PAN_115_URL -O /tmp/115.deb
+wget $PAN_115_URL -qO /tmp/115.deb
 apt install -y /tmp/115.deb
 rm /tmp/115.deb
-wget $PAN_BAIDU_URL -O /tmp/baidunetdisk.deb
+wget $PAN_BAIDU_URL -qO /tmp/baidunetdisk.deb
 apt install -y /tmp/baidunetdisk.deb
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen
