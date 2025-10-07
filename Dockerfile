@@ -24,7 +24,7 @@ RUN <<EOF bash
 set -e
 apt-get update
 apt-get install -y --no-install-recommends \
-    locales \
+    locales qbittorrent\
     tzdata \
     xfce4 xfce4-goodies \
     python3 python3-pip python3-venv \
