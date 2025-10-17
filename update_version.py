@@ -35,6 +35,8 @@ def get_latest_release(repo_url):
 
 
 def update_docker_env(key,new_url):
+    if new_url is None:
+        return
     with open('docker.env', 'r') as file:
         lines = file.readlines()
 
