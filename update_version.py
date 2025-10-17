@@ -1,4 +1,6 @@
 # coding=utf-8
+import time
+
 import requests
 #from bs4 import BeautifulSoup
 import re
@@ -51,12 +53,18 @@ def update_docker_env(key,new_url):
 def get_latest_url(pkg_name):
     ret=requests.get(f'https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h={pkg_name}')
     if ret.status_code != 200:
+        print("fail",ret.status_code)
         return None
     bash_script = ret.text+'echo $source_x86_64\n'
     result=subprocess.run(['bash'],text=True,input=bash_script,check=True,capture_output=True)
     url=result.stdout.split('::')[1]
     return url.strip()
 if __name__ == "__main__":
+    update_docker_env('TMM_URL',get_latest_url('tinymediamanager-bin'))
+    time.sleep(1)
+    update_docker_env('PAN_115_URL',get_latest_url('115-browser-bin'))
+    time.sleep(1)
+    update_docker_env('PAN_BAIDU_URL',get_latest_url('baidunetdisk-bin'))
     tag_name, urls = get_latest_release("https://github.com/outloudvi/mw2fcitx")
     for url in urls:
         if url.endswith('.dict'):
@@ -70,7 +78,3 @@ if __name__ == "__main__":
             download_url = url
             update_docker_env('WIKI_DICT_URL',download_url)
             break
-
-    update_docker_env('TMM_URL',get_latest_url('tinymediamanager-bin'))
-    update_docker_env('PAN_115_URL',get_latest_url('115-browser-bin'))
-    update_docker_env('PAN_BAIDU_URL',get_latest_url('baidunetdisk-bin'))
