@@ -35,7 +35,7 @@ apt-get install -y --no-install-recommends \
     dbus-x11 xfonts-base xfonts-75dpi fcitx5 fonts-noto fuse novnc websockify\
     wget ca-certificates openssh-server cmake git rsync sudo \
     build-essential ffmpeg  firefox-esr nano libmediainfo0v5 fcitx5-chinese-addons \
-    fcitx5-module-cloudpinyin fcitx5-config-qt tmux curl unzip p7zip-full file
+    fcitx5-module-cloudpinyin fcitx5-config-qt libgdiplus tmux curl unzip p7zip-full file
 apt-get install -y --no-install-recommends -t trixie-backports qbittorrent
 EOF
 RUN <<EOF bash

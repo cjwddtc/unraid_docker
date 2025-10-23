@@ -18,6 +18,7 @@ jobs:
     - name: Update
       id: check
       run: |
+        export GITHUB_API_TOKEN=${{ secrets.API_KEY_GITHUB }}
         python update_version.py
         wget -qO - https://mirrors.ustc.edu.cn/debian/dists/trixie-backports/main/binary-amd64/Packages.xz|xz -d -c|awk '/^Package: qbittorrent$/{getline;print}' > qbittorrent.version
         if [ $(git diff --name-only | wc -l) -gt 0 ]; then

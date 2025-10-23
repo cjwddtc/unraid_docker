@@ -1,5 +1,6 @@
 # coding=utf-8
 import time
+from os import environ
 
 import requests
 #from bs4 import BeautifulSoup
@@ -18,8 +19,14 @@ def get_latest_release(repo_url):
     owner_repo = repo_url.rstrip('/').split('/')[-2:]
     api_url = f"https://api.github.com/repos/{'/'.join(owner_repo)}/releases/latest"
 
+    # 添加 GitHub API token 认证
+    headers = {
+        'Authorization': 'token '+ environ['GITHUB_API_TOKEN'],
+        'Accept': 'application/vnd.github.v3+json'
+    }
+
     try:
-        response = requests.get(api_url, timeout=15)
+        response = requests.get(api_url, headers=headers, timeout=15)
         response.raise_for_status()
 
         # 解析 release 信息
@@ -59,6 +66,7 @@ def get_latest_url(pkg_name):
     result=subprocess.run(['bash'],text=True,input=bash_script,check=True,capture_output=True)
     url=result.stdout.split('::')[1]
     return url.strip()
+import sys
 if __name__ == "__main__":
     update_docker_env('TMM_URL',get_latest_url('tinymediamanager-bin'))
     time.sleep(1)
