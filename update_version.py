@@ -58,13 +58,17 @@ def update_docker_env(key,new_url):
                 file.write(line)
 
 def get_latest_url(pkg_name):
-    ret=requests.get(f'https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h={pkg_name}')
+
+    ret = requests.get(
+        f'https://raw.githubusercontent.com/archlinux/aur/refs/heads/{pkg_name}/PKGBUILD',
+        timeout=15
+    )
     if ret.status_code != 200:
-        print("fail",ret.status_code)
+        print("fail", ret.status_code)
         return None
-    bash_script = ret.text+'echo $source_x86_64\n'
-    result=subprocess.run(['bash'],text=True,input=bash_script,check=True,capture_output=True)
-    url=result.stdout.split('::')[1]
+    bash_script = ret.text + 'echo $source_x86_64\n'
+    result = subprocess.run(['bash'], text=True, input=bash_script, check=True, capture_output=True)
+    url = result.stdout.split('::')[1]
     return url.strip()
 import sys
 if __name__ == "__main__":
