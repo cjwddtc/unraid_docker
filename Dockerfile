@@ -74,7 +74,7 @@ EOF
 RUN <<EOF bash
 set -e
 python3 -m venv /usr/local
-pip3 install requests  Levenshtein ffmpeg-python  qbittorrent-api lxml selenium uvx
+pip3 install requests  Levenshtein ffmpeg-python  qbittorrent-api lxml selenium uv
 EOF
 ENV GTK_IM_MODULE=fcitx
 ENV QT_IM_MODULE=fcitx
