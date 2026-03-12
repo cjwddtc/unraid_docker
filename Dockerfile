@@ -30,7 +30,7 @@ apt-get install -y --no-install-recommends \
     xfce4 xfce4-goodies \
     python3 python3-pip python3-venv \
     fontconfig 7zip nodejs npm runsc\
-    fonts-wqy-microhei fonts-wqy-zenhei \
+    fonts-wqy-microhei fonts-wqy-zenhei docker-cli \
     x11vnc tigervnc-standalone-server tigervnc-tools\
     dbus-x11 xfonts-base xfonts-75dpi fcitx5 fonts-noto fuse novnc websockify\
     wget ca-certificates openssh-server cmake git rsync sudo \
