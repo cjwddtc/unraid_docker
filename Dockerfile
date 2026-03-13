@@ -61,6 +61,7 @@ apt install -y /tmp/115.deb
 rm /tmp/115.deb
 wget $PAN_BAIDU_URL -qO /tmp/baidunetdisk.deb
 apt install -y /tmp/baidunetdisk.deb
+wget -qO /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 && chmod +x /usr/local/bin/ttyd
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen
 locale-gen
