@@ -35,8 +35,9 @@ apt-get install -y --no-install-recommends \
     x11vnc tigervnc-standalone-server tigervnc-tools\
     dbus-x11 xfonts-base xfonts-75dpi fcitx5 fonts-noto fuse novnc websockify\
     wget ca-certificates openssh-server cmake git rsync sudo \
-    build-essential ffmpeg  firefox-esr nano libmediainfo0v5 fcitx5-chinese-addons \
-    fcitx5-module-cloudpinyin fcitx5-config-qt libgdiplus tmux curl unzip p7zip-full 7zip-rar file
+    build-essential ffmpeg firefox-esr nano libmediainfo0v5 fcitx5-chinese-addons \
+    fcitx5-module-cloudpinyin fcitx5-config-qt libgdiplus tmux curl unzip p7zip-full 7zip-rar file \
+    supervisor
 apt-get install -y --no-install-recommends -t trixie-backports qbittorrent
 EOF
 RUN <<EOF bash
