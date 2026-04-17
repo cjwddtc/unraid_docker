@@ -90,7 +90,8 @@ pip3 install \
     ffmpeg-python \
     lxml \
     selenium \
-    uv
+    uv \
+    defusedxml
 EOF
 ENV GTK_IM_MODULE=fcitx
 ENV QT_IM_MODULE=fcitx
