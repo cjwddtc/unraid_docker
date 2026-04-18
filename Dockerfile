@@ -91,7 +91,8 @@ pip3 install \
     lxml \
     selenium \
     uv \
-    defusedxml
+    defusedxml \
+    httpx
 EOF
 ENV GTK_IM_MODULE=fcitx
 ENV QT_IM_MODULE=fcitx
