@@ -25,6 +25,10 @@ EOF
 RUN <<EOF bash
 set -e
 apt-get update
+apt-get install -y --no-install-recommends wget ca-certificates gnupg
+wget -qO- https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-linux-signing-keyring.gpg
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
+apt-get update
 apt-get install -y --no-install-recommends \
     locales\
     tzdata \
@@ -35,7 +39,7 @@ apt-get install -y --no-install-recommends \
     x11vnc tigervnc-standalone-server tigervnc-tools\
     dbus-x11 xfonts-base xfonts-75dpi fcitx5 fonts-noto fuse novnc websockify\
     wget ca-certificates openssh-server cmake git rsync sudo \
-    build-essential ffmpeg firefox-esr nano libmediainfo0v5 fcitx5-chinese-addons \
+    build-essential ffmpeg google-chrome-stable nano libmediainfo0v5 fcitx5-chinese-addons \
     fcitx5-module-cloudpinyin fcitx5-config-qt libgdiplus tmux curl unzip p7zip-full 7zip-rar file \
     supervisor
 apt-get install -y --no-install-recommends -t trixie-backports qbittorrent
