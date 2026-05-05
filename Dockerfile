@@ -45,11 +45,12 @@ apt-get install -y --no-install-recommends \
 apt-get install -y --no-install-recommends -t trixie-backports qbittorrent
 EOF
 RUN <<EOF bash
+set -euo pipefail
 echo "root:$ROOT_PASSWORD" | chpasswd
 mkdir -p /usr/share/fcitx5/pinyin/dictionaries/
-wget $MEO_DICT_URL -qO /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
-wget $WIKI_DICT_URL -qO /usr/share/fcitx5/pinyin/dictionaries/zhwiki.dict
-wget $TMM_URL -qO /tmp/tmm.tar.xz
+wget --tries=3 --timeout=60 "$MEO_DICT_URL" -qO /usr/share/fcitx5/pinyin/dictionaries/moegirl.dict
+wget --tries=3 --timeout=60 "$WIKI_DICT_URL" -qO /usr/share/fcitx5/pinyin/dictionaries/zhwiki.dict
+wget --tries=3 --timeout=60 "$TMM_URL" -qO /tmp/tmm.tar.xz
 mkdir -p /opt
 cd /opt
 tar xf /tmp/tmm.tar.xz
@@ -62,11 +63,14 @@ Name=tinyMediaManager
 Icon=/opt/tinyMediaManager/tmm.png
 Exec=/opt/tinyMediaManager/tinyMediaManager
 EOM
-wget $PAN_115_URL -qO /tmp/115.deb
-apt install -y /tmp/115.deb
+wget --tries=3 --timeout=60 "$PAN_115_URL" -qO /tmp/115.deb
+dpkg-deb --info /tmp/115.deb >/dev/null
+apt-get install -y /tmp/115.deb
 rm /tmp/115.deb
-wget $PAN_BAIDU_URL -qO /tmp/baidunetdisk.deb
-apt install -y /tmp/baidunetdisk.deb
+wget --tries=3 --timeout=60 "$PAN_BAIDU_URL" -qO /tmp/baidunetdisk.deb
+dpkg-deb --info /tmp/baidunetdisk.deb >/dev/null
+apt-get install -y /tmp/baidunetdisk.deb
+rm /tmp/baidunetdisk.deb
 wget -qO /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 && chmod +x /usr/local/bin/ttyd
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen
