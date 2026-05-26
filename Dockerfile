@@ -7,6 +7,7 @@ ARG PAN_115_URL
 ARG PAN_BAIDU_URL
 ARG ROOT_PASSWORD
 ARG DEBIAN_MIRROR=deb.debian.org
+ARG RUNTIME_DEBIAN_MIRROR=mirrors.ustc.edu.cn
 # 环境变量
 ENV LANG=zh_CN.UTF-8
 ENV LANGUAGE=zh_CN:zh
@@ -109,6 +110,10 @@ pip3 install \
     uv \
     defusedxml \
     httpx
+EOF
+RUN <<EOF
+set -e
+sed -i "s#${DEBIAN_MIRROR}#${RUNTIME_DEBIAN_MIRROR}#g" /etc/apt/sources.list.d/debian.sources
 EOF
 ENV GTK_IM_MODULE=fcitx
 ENV QT_IM_MODULE=fcitx
