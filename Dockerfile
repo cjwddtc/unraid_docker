@@ -6,6 +6,7 @@ ARG WIKI_DICT_URL
 ARG PAN_115_URL
 ARG PAN_BAIDU_URL
 ARG ROOT_PASSWORD
+ARG DEBIAN_MIRROR=deb.debian.org
 # 环境变量
 ENV LANG=zh_CN.UTF-8
 ENV LANGUAGE=zh_CN:zh
@@ -15,10 +16,17 @@ ENV DEBIAN_FRONTEND=noninteractive
 # 工作目录
 WORKDIR /root
 
-# 替换为中科大源并启用 non-free, contrib
+# 配置 Debian 源并启用 non-free, contrib
 RUN <<EOF
-sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources
+set -e
+sed -i "s/deb.debian.org/${DEBIAN_MIRROR}/g" /etc/apt/sources.list.d/debian.sources
 sed -i 's/Components: main/Components: main contrib non-free non-free-firmware/g' /etc/apt/sources.list.d/debian.sources
+printf '%s\n' \
+  'Acquire::Retries "5";' \
+  'Acquire::http::Timeout "60";' \
+  'Acquire::https::Timeout "60";' \
+  'Acquire::http::Pipeline-Depth "0";' \
+  >/etc/apt/apt.conf.d/80-retries
 EOF
 
 # 设置时区和安装所需软件
