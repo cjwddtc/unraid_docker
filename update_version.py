@@ -70,23 +70,32 @@ def get_latest_url(pkg_name):
     result = subprocess.run(['bash'], text=True, input=bash_script, check=True, capture_output=True)
     url = result.stdout.split('::')[1]
     return url.strip()
+
+
+def get_spark_store_url(pkg_name):
+    base_url = (
+        'https://mirrors.sdu.edu.cn/spark-store-repository/'
+        f'store/network/{pkg_name}/'
+    )
+    try:
+        response = requests.get(urljoin(base_url, 'app.json'), timeout=15)
+        response.raise_for_status()
+        filename = response.json()['Filename']
+        return urljoin(base_url, filename)
+    except (requests.RequestException, KeyError, ValueError) as e:
+        print(f'Error fetching Spark Store package: {e}')
+        return None
+
+
 import sys
 if __name__ == "__main__":
     update_docker_env('TMM_URL',get_latest_url('tinymediamanager-bin'))
     time.sleep(1)
     update_docker_env('PAN_115_URL',get_latest_url('115-browser-bin'))
     time.sleep(1)
-    baidu_url = get_latest_url('baidunetdisk-bin')
-    if baidu_url is not None:
-        # The AUR URL redirects GitHub-hosted runners to an unreliable HTTP
-        # CDN endpoint on port 19000. Baidu's HTTPS package endpoint serves
-        # the same path through its TLS-enabled CDN instead.
-        baidu_url = re.sub(
-            r'^https?://wppkg\.baidupcs\.com',
-            'https://pkg-ant.baidu.com',
-            baidu_url,
-        )
-    update_docker_env('PAN_BAIDU_URL',baidu_url)
+    # Baidu's official endpoint redirects to CDN ports 19000/19001, which are
+    # unreachable from GitHub-hosted runners. Use SDU's HTTPS Spark mirror.
+    update_docker_env('PAN_BAIDU_URL',get_spark_store_url('baidunetdisk'))
     tag_name, urls = get_latest_release("https://github.com/outloudvi/mw2fcitx")
     for url in urls:
         if url.endswith('.dict'):
