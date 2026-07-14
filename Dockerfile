@@ -5,7 +5,6 @@ ARG MEO_DICT_URL
 ARG WIKI_DICT_URL
 ARG PAN_115_URL
 ARG PAN_BAIDU_URL
-ARG ROOT_PASSWORD
 ARG DEBIAN_MIRROR=deb.debian.org
 ARG RUNTIME_DEBIAN_MIRROR=mirrors.ustc.edu.cn
 # 环境变量
@@ -53,9 +52,9 @@ apt-get install -y --no-install-recommends \
     supervisor
 apt-get install -y --no-install-recommends -t trixie-backports qbittorrent
 EOF
-RUN <<EOF bash
+RUN --mount=type=secret,id=root_password <<'EOF' bash
 set -euo pipefail
-echo "root:$ROOT_PASSWORD" | chpasswd
+echo "root:$(cat /run/secrets/root_password)" | chpasswd
 mkdir -p /usr/share/fcitx5/pinyin/dictionaries/
 
 download() {

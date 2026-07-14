@@ -48,10 +48,11 @@ jobs:
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        secrets: |
+          root_password=${{ secrets.ROOT_PASSWORD }}
         build-args: |
           TMM_URL=${{ env.TMM_URL }}
           MEO_DICT_URL=${{ env.MEO_DICT_URL }}
           WIKI_DICT_URL=${{ env.WIKI_DICT_URL }}
           PAN_115_URL=${{ env.PAN_115_URL }}
           PAN_BAIDU_URL=${{ env.PAN_BAIDU_URL }}
-          ROOT_PASSWORD=${{ secrets.ROOT_PASSWORD }}

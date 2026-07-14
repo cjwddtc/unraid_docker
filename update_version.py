@@ -76,7 +76,17 @@ if __name__ == "__main__":
     time.sleep(1)
     update_docker_env('PAN_115_URL',get_latest_url('115-browser-bin'))
     time.sleep(1)
-    update_docker_env('PAN_BAIDU_URL',get_latest_url('baidunetdisk-bin'))
+    baidu_url = get_latest_url('baidunetdisk-bin')
+    if baidu_url is not None:
+        # The AUR URL redirects GitHub-hosted runners to an unreliable HTTP
+        # CDN endpoint on port 19000. Baidu's HTTPS package endpoint serves
+        # the same path through its TLS-enabled CDN instead.
+        baidu_url = re.sub(
+            r'^https?://wppkg\.baidupcs\.com',
+            'https://pkg-ant.baidu.com',
+            baidu_url,
+        )
+    update_docker_env('PAN_BAIDU_URL',baidu_url)
     tag_name, urls = get_latest_release("https://github.com/outloudvi/mw2fcitx")
     for url in urls:
         if url.endswith('.dict'):
