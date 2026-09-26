@@ -108,7 +108,7 @@ python3 -m venv /usr/local
 pip3 install \
     fastapi \
     "uvicorn[standard]" \
-    sqlalchemy \
+    "sqlalchemy[asyncio]" \
     python-Levenshtein \
     requests \
     qbittorrent-api \
@@ -121,6 +121,8 @@ pip3 install \
     uv \
     defusedxml \
     httpx
+# Verify tv_auto_web's async database dependencies while building the image.
+python3 -c "import greenlet, aiosqlite; from sqlalchemy.ext.asyncio import create_async_engine"
 EOF
 RUN <<EOF
 set -e
