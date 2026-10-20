@@ -120,9 +120,11 @@ pip3 install \
     selenium \
     uv \
     defusedxml \
-    httpx
-# Verify tv_auto_web's async database dependencies while building the image.
+    httpx \
+    "beautifulsoup4>=4.12.3"
+# Verify tv_auto_web's async database and subtitle parsing dependencies at build time.
 python3 -c "import greenlet, aiosqlite; from sqlalchemy.ext.asyncio import create_async_engine"
+python3 -c "from bs4 import BeautifulSoup; assert BeautifulSoup('<p>subtitle</p>', 'html.parser').p.get_text() == 'subtitle'"
 EOF
 RUN <<EOF
 set -e
