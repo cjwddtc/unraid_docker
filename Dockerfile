@@ -49,7 +49,14 @@ apt-get install -y --no-install-recommends \
     wget ca-certificates openssh-server cmake git rsync sudo \
     build-essential ffmpeg google-chrome-stable nano libmediainfo0v5 fcitx5-chinese-addons \
     fcitx5-module-cloudpinyin fcitx5-config-qt libgdiplus tmux curl unzip p7zip-full 7zip-rar file \
-    supervisor
+    supervisor \
+    bluez blueman dbus util-linux
+# Keep Bluetooth dependencies in the image instead of installing them at startup.
+test -x /usr/libexec/bluetooth/bluetoothd
+command -v bluetoothctl
+command -v blueman-manager
+command -v dbus-daemon
+command -v nsenter
 apt-get install -y --no-install-recommends -t trixie-backports qbittorrent
 EOF
 RUN --mount=type=secret,id=root_password <<'EOF' bash
