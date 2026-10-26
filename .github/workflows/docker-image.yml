@@ -56,3 +56,5 @@ jobs:
           WIKI_DICT_URL=${{ env.WIKI_DICT_URL }}
           PAN_115_URL=${{ env.PAN_115_URL }}
           PAN_BAIDU_URL=${{ env.PAN_BAIDU_URL }}
+          CHATGPT_URL=${{ env.CHATGPT_URL }}
+          CHATGPT_SHA256=${{ env.CHATGPT_SHA256 }}

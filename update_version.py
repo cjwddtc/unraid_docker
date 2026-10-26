@@ -83,6 +83,24 @@ def get_baidu_netdisk_url():
     )
 
 
+def get_chatgpt_release():
+    response = requests.get(
+        'https://raw.githubusercontent.com/archlinux/aur/refs/heads/chatgpt-desktop/PKGBUILD',
+        timeout=15,
+    )
+    response.raise_for_status()
+    bash_script = response.text + '\nprintf "\\n%s\\n%s\\n" "${source_x86_64[0]}" "${sha256sums_x86_64[0]}"\n'
+    result = subprocess.run(['bash'], text=True, input=bash_script, check=True, capture_output=True)
+    source, checksum = result.stdout.strip().splitlines()[-2:]
+    url = source.rsplit('::', 1)[-1]
+    if not re.fullmatch(
+        r'https://persistent\.oaistatic\.com/codex-app-prod/linux/deb/pool/main/c/chatgpt/chatgpt_[0-9.]+_amd64\.deb',
+        url,
+    ) or not re.fullmatch(r'[0-9a-fA-F]{64}', checksum):
+        raise ValueError('AUR ChatGPT must provide a versioned official amd64 deb and SHA256')
+    return url, checksum.lower()
+
+
 import sys
 if __name__ == "__main__":
     update_docker_env('TMM_URL',get_latest_url('tinymediamanager-bin'))
@@ -92,6 +110,9 @@ if __name__ == "__main__":
     # Baidu's pkg-ant.baidu.com endpoint redirects to PCDN ports 19000/19001,
     # which are unreachable from GitHub-hosted runners. Use issuecdn.baidupcs.com.
     update_docker_env('PAN_BAIDU_URL',get_baidu_netdisk_url())
+    chatgpt_url, chatgpt_sha256 = get_chatgpt_release()
+    update_docker_env('CHATGPT_URL', chatgpt_url)
+    update_docker_env('CHATGPT_SHA256', chatgpt_sha256)
     tag_name, urls = get_latest_release("https://github.com/outloudvi/mw2fcitx")
     for url in urls:
         if url.endswith('.dict'):
