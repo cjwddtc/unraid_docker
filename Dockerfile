@@ -5,8 +5,6 @@ ARG MEO_DICT_URL
 ARG WIKI_DICT_URL
 ARG PAN_115_URL
 ARG PAN_BAIDU_URL
-ARG CHATGPT_URL
-ARG CHATGPT_SHA256
 ARG DEBIAN_MIRROR=deb.debian.org
 ARG RUNTIME_DEBIAN_MIRROR=mirrors.ustc.edu.cn
 # 环境变量
@@ -51,7 +49,7 @@ apt-get install -y --no-install-recommends \
     wget ca-certificates openssh-server cmake git rsync sudo \
     build-essential ffmpeg google-chrome-stable nano libmediainfo0v5 fcitx5-chinese-addons \
     fcitx5-module-cloudpinyin fcitx5-config-qt libgdiplus tmux curl unzip p7zip-full 7zip-rar file \
-    supervisor firefox-esr firefox-esr-l10n-zh-cn \
+    supervisor \
     bluez blueman dbus util-linux
 # Keep Bluetooth dependencies in the image instead of installing them at startup.
 test -x /usr/libexec/bluetooth/bluetoothd
@@ -99,14 +97,6 @@ download "Baidu Netdisk" "$PAN_BAIDU_URL" /tmp/baidunetdisk.deb
 dpkg-deb --info /tmp/baidunetdisk.deb >/dev/null
 apt-get install -y /tmp/baidunetdisk.deb
 rm /tmp/baidunetdisk.deb
-download "ChatGPT" "$CHATGPT_URL" /tmp/chatgpt.deb
-printf '%s  %s\n' "$CHATGPT_SHA256" /tmp/chatgpt.deb | sha256sum -c -
-test "$(dpkg-deb -f /tmp/chatgpt.deb Package)" = chatgpt
-test "$(dpkg-deb -f /tmp/chatgpt.deb Architecture)" = amd64
-apt-get install -y /tmp/chatgpt.deb
-command -v chatgpt
-command -v firefox-esr
-rm /tmp/chatgpt.deb
 download "ttyd" "https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64" /usr/local/bin/ttyd
 chmod +x /usr/local/bin/ttyd
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
