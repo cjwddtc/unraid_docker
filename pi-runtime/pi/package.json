@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@earendil-works/pi-coding-agent": "^1.4.0",
+    "pi-live-codex": "^0.1.10",
+    "pi-subagents": "^0.83.1"
+  }
+}

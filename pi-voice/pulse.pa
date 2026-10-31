@@ -1,0 +1,6 @@
+load-module module-native-protocol-unix
+load-module module-alsa-sink device=plughw:CARD=MCP01,DEV=0 sink_name=mcp01 rate=48000 channels=2
+load-module module-alsa-source device=hw:CARD=MCP01,DEV=0 source_name=mcp01_mic rate=48000 channels=1 channel_map=mono tsched=0
+set-default-sink mcp01
+set-default-source mcp01_mic
+set-sink-volume mcp01 65536

@@ -1,0 +1,16 @@
+Port 22
+HostKey /root/pi-voice/ssh/ssh_host_ed25519_key
+PidFile /run/sshd/chatgpt.pid
+AuthorizedKeysFile /data/.ssh/authorized_keys
+PubkeyAuthentication yes
+AuthenticationMethods publickey
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitEmptyPasswords no
+PermitRootLogin no
+AllowUsers chatgpt
+UsePAM yes
+PrintMotd no
+PrintLastLog no
+SetEnv CODEX_HOME=/data/.codex
+Subsystem sftp internal-sftp

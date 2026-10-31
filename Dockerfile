@@ -7,6 +7,7 @@ ARG PAN_115_URL
 ARG PAN_BAIDU_URL
 ARG DEBIAN_MIRROR=deb.debian.org
 ARG RUNTIME_DEBIAN_MIRROR=mirrors.ustc.edu.cn
+ARG PI_NODE_VERSION=24.22.2
 # 环境变量
 ENV LANG=zh_CN.UTF-8
 ENV LANGUAGE=zh_CN:zh
@@ -50,7 +51,9 @@ apt-get install -y --no-install-recommends \
     build-essential ffmpeg google-chrome-stable nano libmediainfo0v5 fcitx5-chinese-addons \
     fcitx5-module-cloudpinyin fcitx5-config-qt libgdiplus tmux curl unzip p7zip-full 7zip-rar file \
     supervisor \
-    bluez blueman dbus util-linux
+    bluez blueman dbus util-linux \
+    pulseaudio pulseaudio-utils alsa-utils libasound2-plugins \
+    openssh-client iproute2 iputils-ping espeak-ng procps ripgrep firefox-esr xz-utils
 # Keep Bluetooth dependencies in the image instead of installing them at startup.
 test -x /usr/libexec/bluetooth/bluetoothd
 command -v bluetoothctl
@@ -59,6 +62,12 @@ command -v dbus-daemon
 command -v nsenter
 apt-get install -y --no-install-recommends -t trixie-backports qbittorrent
 EOF
+# Bundle the tested agent runtime without starting it or adding private data.
+# /opt/pi-image is separate from the legacy /opt/pi-voice-runtime bind mount.
+COPY pi-runtime/ /usr/local/share/pi-runtime/
+COPY pi-voice/ /usr/local/share/pi-voice/
+RUN bash /usr/local/share/pi-runtime/install.sh "$PI_NODE_VERSION" \
+    && bash /usr/local/share/pi-runtime/smoke.sh
 RUN --mount=type=secret,id=root_password <<'EOF' bash
 set -euo pipefail
 echo "root:$(cat /run/secrets/root_password)" | chpasswd
