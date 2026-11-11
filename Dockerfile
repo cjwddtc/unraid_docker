@@ -137,10 +137,13 @@ pip3 install \
     uv \
     defusedxml \
     httpx \
+    "PyYAML>=6.0" \
+    "openai>=1.68.0" \
     "beautifulsoup4>=4.12.3"
 # Verify tv_auto_web's async database and subtitle parsing dependencies at build time.
 python3 -c "import greenlet, aiosqlite; from sqlalchemy.ext.asyncio import create_async_engine"
 python3 -c "from bs4 import BeautifulSoup; assert BeautifulSoup('<p>subtitle</p>', 'html.parser').p.get_text() == 'subtitle'"
+python3 -c "import yaml; from openai import APIConnectionError, APIStatusError, AsyncOpenAI; client = AsyncOpenAI(api_key='build-check'); assert callable(client.responses.create); assert yaml.safe_load('enabled: true')['enabled'] is True"
 EOF
 RUN <<EOF
 set -e

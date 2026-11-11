@@ -2,6 +2,8 @@
 
 镜像：`docker.io/cjwddtc/debian_vnc:latest`。沿用原桌面、媒体工具和版本监测流程，main 提交触发 GitHub Actions 构建发布。
 
+tv_auto_web 依赖包含 `openai>=1.68.0` 和 `PyYAML>=6.0`；构建时检查 OpenAI 异步客户端的 Responses 接口及 YAML 解析，不调用云端 API。
+
 ## Pi / Codex 语音运行环境
 
 镜像预装已验证版本：Node 24.22.2、Pi 1.4.0、Codex CLI 0.166.0、pi-live-codex 0.1.10、pi-subagents 0.83.1、numpy 2.4.6、sherpa-onnx 2.0.1，以及 PulseAudio/ALSA、SSH、ping、ripgrep 和 Firefox ESR。npm 使用从已验证环境导出的 package-lock.json，以 `npm ci` 安装；Node 发行包验证官方 SHA256。
