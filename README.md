@@ -2,7 +2,7 @@
 
 镜像：`docker.io/cjwddtc/debian_vnc:latest`。沿用原桌面、媒体工具和版本监测流程，main 提交触发 GitHub Actions 构建发布。
 
-tv_auto_web 依赖包含 `openai>=1.68.0` 和 `PyYAML>=6.0`；构建时检查 OpenAI 异步客户端的 Responses 接口及 YAML 解析，不调用云端 API。
+tv_auto_web 依赖包含 `openai>=3.49.0`、`pydantic-ai-slim[openai]==2.68.0` 和 `PyYAML>=6.0`；构建时检查 Pydantic AI 的模型及 Provider 导入、OpenAI 异步客户端的 Responses 接口及 YAML 解析，不调用云端 API。
 
 ## Pi / Codex 语音运行环境
 
