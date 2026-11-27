@@ -42,7 +42,7 @@ apt-get install -y --no-install-recommends \
     tzdata \
     xfce4 xfce4-goodies \
     python3 python3-pip python3-venv \
-    fontconfig 7zip nodejs npm runsc\
+    fontconfig 7zip libatomic1 runsc\
     fonts-wqy-microhei fonts-wqy-zenhei docker-cli \
     x11vnc tigervnc-standalone-server tigervnc-tools\
     dbus-x11 xfonts-base xfonts-75dpi fcitx5 fonts-noto fuse novnc websockify\
@@ -143,6 +143,30 @@ EOF
 RUN <<EOF
 set -e
 sed -i "s#${DEBIAN_MIRROR}#${RUNTIME_DEBIAN_MIRROR}#g" /etc/apt/sources.list.d/debian.sources
+EOF
+
+RUN <<'EOF' bash
+set -euo pipefail
+node_version=24.22.3
+case "$(dpkg --print-architecture)" in
+  amd64) node_arch=x64; checksum=4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb ;;
+  arm64) node_arch=arm64; checksum=6e51a2ada00f0011cc266f65d98922b403d7ad88f809ca2aa615a5fe1ce6e86c ;;
+  ppc64el) node_arch=ppc64le; checksum=c4b446699171f64763304a0bc6fb972b0fb4acb1de5358e52b4c52a95883593a ;;
+  s390x) node_arch=s390x; checksum=b5dbeb563ffb81946478fd765ae92efc21117e410e4e9b7d966bf59b00cee55d ;;
+  *) echo "No pinned Node.js release for $(dpkg --print-architecture)" >&2; exit 1 ;;
+esac
+release="node-v$node_version-linux-$node_arch"
+archive="$(mktemp)"
+trap 'rm -f "$archive"' EXIT
+curl -fsSL --retry 3 "https://nodejs.org/dist/v$node_version/$release.tar.xz" -o "$archive"
+printf '%s  %s\n' "$checksum" "$archive" | sha256sum -c -
+tar -xJf "$archive" -C /usr/local --strip-components=1 --no-same-owner \
+  "$release/bin/node" "$release/bin/npm" "$release/bin/npx" \
+  "$release/lib/node_modules/npm" "$release/include/node"
+ln -s node /usr/local/bin/nodejs
+test ! -e /usr/bin/node
+test "$(node --version)" = "v$node_version"
+npm --version
 EOF
 
 COPY codex.version /usr/local/share/codex.version
