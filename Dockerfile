@@ -164,7 +164,7 @@ tar -xJf "$archive" -C /usr/local --strip-components=1 --no-same-owner \
   "$release/bin/node" "$release/bin/npm" "$release/bin/npx" \
   "$release/lib/node_modules/npm" "$release/include/node"
 ln -s node /usr/local/bin/nodejs
-test ! -e /usr/bin/node
+test "$(command -v node)" = /usr/local/bin/node
 test "$(node --version)" = "v$node_version"
 npm --version
 EOF
