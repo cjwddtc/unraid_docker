@@ -10,6 +10,9 @@ on:
       image-name:
         type: string
         required: true
+      source_sha:
+        type: string
+        required: true
 
 
 jobs:
@@ -21,14 +24,16 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.source_sha || github.sha }}
     - name: Load environment variables from docker.env
       run: |
-        git pull
         cat docker.env >> $GITHUB_ENV
     - name: Extract Docker metadata
       id: meta
       uses: docker/metadata-action@v5
       with:
+        context: git
         images: ${{ secrets.DOCKERHUB_USERNAME }}/debian_vnc
         tags: |
           type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}

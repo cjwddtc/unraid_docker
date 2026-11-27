@@ -7,6 +7,8 @@ import requests
 import re
 from urllib.parse import urljoin
 import subprocess
+from pathlib import Path
+import sys
 
 
 def get_latest_release(repo_url):
@@ -83,8 +85,27 @@ def get_baidu_netdisk_url():
     )
 
 
-import sys
+def update_codex_version():
+    try:
+        response = requests.get(
+            "https://registry.npmjs.org/@openai%2Fcodex/latest", timeout=15
+        )
+        response.raise_for_status()
+        version = response.json()["version"]
+        if not isinstance(version, str) or not re.fullmatch(r"\d+\.\d+\.\d+", version):
+            raise ValueError("expected a stable version")
+    except (requests.RequestException, KeyError, TypeError, ValueError) as error:
+        print(f"Codex version check failed: {error}", file=sys.stderr)
+        return
+
+    version_file = Path("codex.version")
+    if version_file.read_text(encoding="ascii").strip() != version:
+        version_file.write_text(f"{version}\n", encoding="ascii")
+        print(f"Codex version: {version}")
+
+
 if __name__ == "__main__":
+    update_codex_version()
     update_docker_env('TMM_URL',get_latest_url('tinymediamanager-bin'))
     time.sleep(1)
     update_docker_env('PAN_115_URL',get_latest_url('115-browser-bin'))

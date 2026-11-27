@@ -12,6 +12,7 @@ jobs:
       actions: write
     outputs:
       should_build: ${{ steps.check.outputs.should_build }}
+      source_sha: ${{ steps.check.outputs.source_sha }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -38,6 +39,7 @@ jobs:
             echo "should_build=true" >> $GITHUB_OUTPUT
           fi
         fi
+        echo "source_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
   
   call-docker-build:
     needs: build
@@ -45,4 +47,5 @@ jobs:
     uses: ./.github/workflows/docker-image.yml
     with:
       image-name: debian_vnc
+      source_sha: ${{ needs.build.outputs.source_sha }}
     secrets: inherit

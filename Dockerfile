@@ -144,6 +144,15 @@ RUN <<EOF
 set -e
 sed -i "s#${DEBIAN_MIRROR}#${RUNTIME_DEBIAN_MIRROR}#g" /etc/apt/sources.list.d/debian.sources
 EOF
+
+COPY codex.version /usr/local/share/codex.version
+RUN --mount=type=cache,target=/root/.npm <<'EOF' bash
+set -e
+version="$(cat /usr/local/share/codex.version)"
+npm install --global --prefix /usr/local --no-audit --no-fund "@openai/codex@$version"
+test "$(codex --version)" = "codex-cli $version"
+EOF
+
 ENV GTK_IM_MODULE=fcitx
 ENV QT_IM_MODULE=fcitx
 ENV XMODIFIERS="@im=fcitx"
