@@ -45,7 +45,7 @@ apt-get install -y --no-install-recommends \
     fontconfig 7zip libatomic1 runsc\
     fonts-wqy-microhei fonts-wqy-zenhei docker-cli \
     x11vnc tigervnc-standalone-server tigervnc-tools\
-    dbus-x11 xfonts-base xfonts-75dpi fcitx5 fonts-noto fuse novnc websockify\
+    dbus-x11 xfonts-base xfonts-75dpi fcitx5 fonts-noto fuse net-tools websockify\
     wget ca-certificates openssh-server cmake git rsync sudo \
     build-essential ffmpeg google-chrome-stable nano libmediainfo0v5 fcitx5-chinese-addons \
     fcitx5-module-cloudpinyin fcitx5-config-qt libgdiplus tmux curl unzip p7zip-full 7zip-rar file \
@@ -145,6 +145,25 @@ set -e
 sed -i "s#${DEBIAN_MIRROR}#${RUNTIME_DEBIAN_MIRROR}#g" /etc/apt/sources.list.d/debian.sources
 EOF
 
+# noVNC runs in the browser; Debian websockify serves the files and proxies VNC.
+RUN <<'EOF' bash
+set -euo pipefail
+version=1.6.0
+release="noVNC-$version"
+archive="$(mktemp)"
+trap 'rm -f "$archive"' EXIT
+curl -fsSL --retry 3 "https://codeload.github.com/novnc/noVNC/tar.gz/refs/tags/v$version" -o "$archive"
+printf '%s  %s\n' 5066103959ef4e9b10f37e5a148627360dd8414e4cf8a7db92bdbd022e728aaa "$archive" | sha256sum -c -
+install -d /usr/share/novnc
+tar -xzf "$archive" -C /usr/share/novnc --strip-components=1 --no-same-owner \
+  "$release/app" "$release/core" "$release/vendor" "$release/utils/novnc_proxy" \
+  "$release/vnc.html" "$release/vnc_lite.html" "$release/defaults.json" \
+  "$release/mandatory.json" "$release/LICENSE.txt" "$release/AUTHORS"
+ln -s vnc.html /usr/share/novnc/vnc_auto.html
+printf '%s\n' '#!/bin/sh' 'exec /usr/share/novnc/utils/novnc_proxy "$@"' > /usr/bin/novnc
+chmod 0755 /usr/bin/novnc
+EOF
+
 RUN <<'EOF' bash
 set -euo pipefail
 node_version=24.22.3
@@ -164,6 +183,10 @@ tar -xJf "$archive" -C /usr/local --strip-components=1 --no-same-owner \
   "$release/bin/node" "$release/bin/npm" "$release/bin/npx" \
   "$release/lib/node_modules/npm" "$release/include/node"
 ln -s node /usr/local/bin/nodejs
+if [ -e /usr/bin/node ] || [ -L /usr/bin/node ]; then
+  echo "Debian packages installed a second Node.js runtime" >&2
+  exit 1
+fi
 test "$(command -v node)" = /usr/local/bin/node
 test "$(node --version)" = "v$node_version"
 npm --version
