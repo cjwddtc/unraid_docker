@@ -47,7 +47,7 @@ apt-get install -y --no-install-recommends \
     x11vnc tigervnc-standalone-server tigervnc-tools\
     dbus-x11 xfonts-base xfonts-75dpi fcitx5 fonts-noto fuse net-tools websockify\
     wget ca-certificates openssh-server cmake git rsync sudo \
-    build-essential ffmpeg google-chrome-stable nano libmediainfo0v5 fcitx5-chinese-addons \
+    build-essential ffmpeg intel-media-va-driver google-chrome-stable nano libmediainfo0v5 fcitx5-chinese-addons \
     fcitx5-module-cloudpinyin fcitx5-config-qt libgdiplus tmux curl unzip p7zip-full 7zip-rar file \
     supervisor \
     bluez blueman dbus util-linux \
